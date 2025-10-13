@@ -8,9 +8,10 @@ using namespace std;
 
 const tny_uword SETNOTE = 0x9000;
 const tny_uword SETCOLOR = 0x9001;
-const tny_uword DISPCOLOR = 0x9002;
-const tny_uword PLAYNOTE = 0x9003;
-
+const tny_uword DISPKEY = 0x9002;
+const tny_uword PLAYKEY = 0x9003;
+const tny_uword SETTONE = 0x9004;
+const tny_uword GETKEY = 0x9005;
 
 
 
@@ -31,10 +32,17 @@ int main(int argc, char *argv[]){
 
 void bus_write(teenyat *t, tny_uword addr, tny_word data, uint16_t *delay) {
     switch(addr) {
-        case :
+        case SETNOTE:
+        case SETCOLOR:
+        case DISPKEY:
+        case PLAYKEY:
+        case SETTONE:
     }
 }
 
 void bus_read(teenyat *t, tny_uword addr, tny_word *data, uint16_t *delay) {
-    
+    switch (addr)
+    {
+    case GETKEY:
+    }
 }
