@@ -60,5 +60,6 @@ void bus_read(teenyat *t, tny_uword addr, tny_word *data, uint16_t *delay) {
     switch (addr)
     {
     case GETKEY:
+        
     }
 }
