@@ -19,7 +19,7 @@
     STR [SET_KEY_FREQ], rA
     STR [SET_KEY_COLOR], rB
     STR [SET_KEY_FREQ], rA
-    SET rA, 0x0105
+    SET rA, 0x0188
     STR [SET_KEY_FREQ], rA
     
     SET rB, GREEN
@@ -27,7 +27,7 @@
     STR [SET_KEY_FREQ], rA
     STR [SET_KEY_COLOR], rB
     STR [SET_KEY_FREQ], rA
-    SET rA, 0x014A
+    SET rA, 0x020B
     STR [SET_KEY_FREQ], rA
     
     SET rB, BLUE
@@ -35,7 +35,7 @@
     STR [SET_KEY_FREQ], rA
     STR [SET_KEY_COLOR], rB
     STR [SET_KEY_FREQ], rA
-    SET rA, 0x0188
+    SET rA, 0x0293
     STR [SET_KEY_FREQ], rA
     
     SET rB, YELLOW
@@ -43,7 +43,7 @@
     STR [SET_KEY_FREQ], rA
     STR [SET_KEY_COLOR], rB
     STR [SET_KEY_FREQ], rA
-    SET rA, 0x020B
+    SET rA, 0x0310
     STR [SET_KEY_FREQ], rA
     
     SET rB, PURPLE
@@ -51,7 +51,7 @@
     STR [SET_KEY_FREQ], rA
     STR [SET_KEY_COLOR], rB
     STR [SET_KEY_FREQ], rA
-    SET rA, 0x0293
+    SET rA, 0x0416
     STR [SET_KEY_FREQ], rA
 
     SET rB, 0
@@ -134,7 +134,7 @@
 !fail_state
     SET rA, 120
     STR [SHOW_KEY], rA
-    SET rA, 0x0F00
+    SET rA, 0x0FD1
     STR [PLAY_FREQUENCY], rA
     SET rE, rC
     SUB rE, rD
