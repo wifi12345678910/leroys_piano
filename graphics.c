@@ -3,7 +3,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
-#include <windows.h>
 
 #define SCREEN_W 800
 #define SCREEN_H 400  // Slightly taller for better proportions
@@ -25,7 +24,8 @@ static Key keys[MAX_KEYS];
 static int keyCount = 0;
 static bool initialized = false;
 static char last_key_detected = 0;
-static DWORD last_key_time = 0;
+static int last_key_time = 0;
+static int frame_counter = 0;
 
 void addKey(const char *label, char keycode, int x, int y, int w, bool is_piano) {
     if (keyCount >= MAX_KEYS) return;
@@ -128,42 +128,70 @@ void set_key_pressed(char keycode, bool pressed) {
     }
 }
 
+// Cross-platform keyboard input using TIGR's direct ASCII approach
 char get_key_input(void) {
     if (!screen) return 0;
     
-    DWORD current_time = GetTickCount();
+    frame_counter++;
     
-    const char* key_chars = "qwertyuiopasdfghjklzxcvbnm1234567890";
-    const int vk_codes[] = {
+    // TIGR uses direct ASCII values for most keys
+    // Check all the keys we care about using their ASCII values
+    char keys_to_check[] = {
+        // Letters (lowercase)
+        'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',
+        'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l',
+        'z', 'x', 'c', 'v', 'b', 'n', 'm',
+        // Numbers
+        '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
+        // Uppercase versions (TIGR might use these)
         'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P',
         'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L',
-        'Z', 'X', 'C', 'V', 'B', 'N', 'M',
-        '1', '2', '3', '4', '5', '6', '7', '8', '9', '0'
+        'Z', 'X', 'C', 'V', 'B', 'N', 'M'
     };
     
-    for (int i = 0; i < 36; i++) {
-        SHORT key_state = GetAsyncKeyState(vk_codes[i]);
-        
-        if (key_state & 0x8000) {
-            if (last_key_detected != key_chars[i] || 
-                current_time - last_key_time > 200) {
+    int num_keys = sizeof(keys_to_check) / sizeof(keys_to_check[0]);
+    
+    // Check for key presses using tigrKeyDown with ASCII values
+    for (int i = 0; i < num_keys; i++) {
+        if (tigrKeyDown(screen, keys_to_check[i])) {
+            char detected_key = tolower(keys_to_check[i]); // Always return lowercase
+            
+            // Debounce: only register key if it's different from last or enough time has passed
+            if (last_key_detected != detected_key || 
+                frame_counter - last_key_time > 12) {  // ~12 frames = ~200ms at 60fps
                 
-                last_key_detected = key_chars[i];
-                last_key_time = current_time;
-                return key_chars[i];
+                last_key_detected = detected_key;
+                last_key_time = frame_counter;
+                return detected_key;
             }
         }
     }
     
+    // Alternative: Check if any key is held down using tigrKeyHeld
+    for (int i = 0; i < num_keys; i++) {
+        if (tigrKeyHeld(screen, keys_to_check[i])) {
+            char detected_key = tolower(keys_to_check[i]);
+            
+            if (last_key_detected != detected_key || 
+                frame_counter - last_key_time > 12) {
+                
+                last_key_detected = detected_key;
+                last_key_time = frame_counter;
+                return detected_key;
+            }
+        }
+    }
+    
+    // Check if no keys are pressed - reset detection after delay
     bool any_key_pressed = false;
-    for (int i = 0; i < 36; i++) {
-        if (GetAsyncKeyState(vk_codes[i]) & 0x8000) {
+    for (int i = 0; i < num_keys; i++) {
+        if (tigrKeyDown(screen, keys_to_check[i]) || tigrKeyHeld(screen, keys_to_check[i])) {
             any_key_pressed = true;
             break;
         }
     }
     
-    if (!any_key_pressed && current_time - last_key_time > 100) {
+    if (!any_key_pressed && frame_counter - last_key_time > 6) {  // ~6 frames = ~100ms
         last_key_detected = 0;
     }
     

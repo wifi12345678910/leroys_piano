@@ -1,74 +1,104 @@
-; Description: 'a' key → Red color + 660Hz sound (special)
-; 's' key → Green color + 880Hz sound (special)
-; 'd' key → Blue color + 1045Hz sound (special)
-; All other keys → White color + 495Hz sound (default)
+; Keys 1-5 play .wav file and light up different colors
+; The rest of the keys are just playing one note 
+; This was to test the .wav files and the highlighting aspects
 
-; Piano Port Constants
-.const GET_KEY      0x9000      ; Read key pressed
-.const PLAY_NOTE    0x9001      ; Play note (type<<4 | freq)
-.const SHOW_KEY     0x9002      ; Show keypress visual
-.const SET_KEYNOTE  0x9003      ; Set/Get keynote
-.const SET_KEYCOLOR 0x9004      ; Set/Get key color
-.const SET_KEYLABEL 0x9005      ; Set/Get key label
+
+.const GET_KEY 0x9000
+.const SHOW_KEY 0x9003
+.const SET_KEY_COLOR 0x9006
+.const SET_KEY_FREQ 0x9004
+.const PLAY_WAV_ID 0x9002
+.const PLAY_FREQUENCY 0x9001
 
 !main
-    cal !setup_keys             ; Set up all the keys with colors
-    
-!main_loop
-    lod rA, [GET_KEY]           ; Read current key
-    cmp rA, rZ                  ; Is it zero (no key)?
-    je !main_loop               ; If no key, keep waiting
-    
-    ; We got a key! Show it and play sound immediately
-    str [SHOW_KEY], rA          ; Show the key press
-    
-    ; Check which key and play appropriate sound
-    cmp rA, 'a'
-    je !play_a
-    
-    cmp rA, 's' 
-    je !play_s
-    
-    cmp rA, 'd'
-    je !play_d
-    
-    ; Default sound for other keys
-    set rB, 5                   ; 220 + 5*55 = 495Hz
-    str [PLAY_NOTE], rB
-    jmp !main_loop              ; Go back to main loop immediately
+    jmp !input_loop
 
-!play_a
-    set rB, 8                   ; 220 + 8*55 = 660Hz
-    str [PLAY_NOTE], rB
-    jmp !main_loop              ; Go back to main loop
-
-!play_s  
-    set rB, 12                  ; 220 + 12*55 = 880Hz
-    str [PLAY_NOTE], rB
-    jmp !main_loop              ; Go back to main loop
-
-!play_d
-    set rB, 15                  ; 220 + 15*55 = 1045Hz
-    str [PLAY_NOTE], rB
-    jmp !main_loop              ; Go back to main loop
-
-!setup_keys
-    ; Set up key 'a' with red color
-    set rA, 'a'
-    str [SET_KEYNOTE], rA       ; Select key 'a'
-    set rA, 224                 ; 0xE0 = Red color
-    str [SET_KEYCOLOR], rA      ; Set red color
+!input_loop
+    ; Get keyboard input
+    lod rA, [GET_KEY]
+    cmp rA, 0
+    je !input_loop
     
-    ; Set up key 's' with green color
-    set rA, 's'
-    str [SET_KEYNOTE], rA       ; Select key 's'
-    set rA, 28                  ; 0x1C = Green color
-    str [SET_KEYCOLOR], rA      ; Set green color
+    ; Handle specific keys
+    cmp rA, 49              ; '1' key
+    je !key_1
+    cmp rA, 50              ; '2' key  
+    je !key_2
+    cmp rA, 51              ; '3' key
+    je !key_3
+    cmp rA, 52              ; '4' key
+    je !key_4
+    cmp rA, 53              ; '5' key
+    je !key_5
+    cmp rA, 97              ; 'a' key
+    je !key_a
+    cmp rA, 27              ; ESC
+    je !exit
     
-    ; Set up key 'd' with blue color
-    set rA, 'd'
-    str [SET_KEYNOTE], rA       ; Select key 'd'
-    set rA, 3                   ; 0x03 = Blue color
-    str [SET_KEYCOLOR], rA      ; Set blue color
-    
-    ret
+    ; Default keys - just play beep
+    set rC, 440
+    str [PLAY_FREQUENCY], rC
+    jmp !input_loop
+
+!key_1
+    ; Select key and set color FIRST
+    str [SET_KEY_FREQ], rA  ; Select key '1'
+    set rB, 224             ; Red color
+    str [SET_KEY_COLOR], rB ; Set color immediately
+    str [SHOW_KEY], rA      ; Show with color already set
+    set rC, 0               ; Applause
+    str [PLAY_WAV_ID], rC
+    jmp !input_loop
+
+!key_2  
+    ; Select key and set color FIRST
+    str [SET_KEY_FREQ], rA  ; Select key '2'
+    set rB, 3               ; Blue color
+    str [SET_KEY_COLOR], rB ; Set color immediately
+    str [SHOW_KEY], rA      ; Show with color already set
+    set rC, 1               ; Arrow
+    str [PLAY_WAV_ID], rC
+    jmp !input_loop
+
+!key_3
+    ; Select key and set color FIRST
+    str [SET_KEY_FREQ], rA  ; Select key '3'
+    set rB, 28              ; Green color
+    str [SET_KEY_COLOR], rB ; Set color immediately
+    str [SHOW_KEY], rA      ; Show with color already set
+    set rC, 2               ; bicycle bell
+    str [PLAY_WAV_ID], rC
+    jmp !input_loop
+
+!key_4
+    ; Select key and set color FIRST
+    str [SET_KEY_FREQ], rA  ; Select key '4'
+    set rB, 252             ; Yellow color
+    str [SET_KEY_COLOR], rB ; Set color immediately
+    str [SHOW_KEY], rA      ; Show with color already set
+    set rC, 3               ; Blip
+    str [PLAY_WAV_ID], rC
+    jmp !input_loop
+
+!key_5
+    ; Select key and set color FIRST
+    str [SET_KEY_FREQ], rA  ; Select key '5'
+    set rB, 163             ; Purple color
+    str [SET_KEY_COLOR], rB ; Set color immediately
+    str [SHOW_KEY], rA      ; Show with color already set
+    set rC, 4               ; Bloop
+    str [PLAY_WAV_ID], rC
+    jmp !input_loop
+
+!key_a
+    ; Blue color + Arrow sound WITH visual (no beep!)
+    str [SET_KEY_FREQ], rA  ; Select key 'a'
+    set rB, 3               ; Blue color
+    str [SET_KEY_COLOR], rB ; Set color
+    str [SHOW_KEY], rA      ; Show visual (NO beep because no default frequency!)
+    set rC, 1               ; Arrow only
+    str [PLAY_WAV_ID], rC
+    jmp !input_loop
+
+!exit
+    jmp !exit
