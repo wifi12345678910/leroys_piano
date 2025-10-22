@@ -139,6 +139,7 @@ void check_keyboard_input() {
         cout << "Key '" << key << "' pressed (ASCII " << (int)key << ")" << endl;
 
         // FOR ALPHABET KEYBOARD
+        
         //playLetterSound(key);
     }
 }
