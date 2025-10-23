@@ -25,6 +25,7 @@ const tny_uword GET_WAV_COUNT = 0x9007;     // Get number of WAV files
 const tny_uword LIST_WAVS = 0x9008;         // List available WAV files
 const tny_uword PLAY_COMBINED = 0x9009;     // Play frequency + WAV together
 const tny_uword SET_KEY_MODE = 0x900A;      // Set key audio mode
+const tny_uword PLAY_LETTER = 0x900B;       //
 
 // Enhanced piano state
 struct EnhancedPianoState {
@@ -238,7 +239,14 @@ void piano_bus_write(teenyat *t, tny_uword addr, tny_word data, uint16_t *delay)
                 }
             }
             break;
-            
+        case PLAY_LETTER:
+            {
+                char key = (char)data.u;
+                cout << "SHOW_KEY: '" << key << "'" << endl;
+                if (key!=0) {
+                    playLetterSound(key);
+                }
+            }
         case SHOW_KEY:
             {
                 char key = (char)data.u;
