@@ -10,6 +10,7 @@
 #include "audio.h"
 #include "graphics.h"
 
+
 using namespace std;
 
 // Enhanced I/O Port addresses
@@ -103,6 +104,26 @@ void init_enhanced_piano_system() {
     cout << "Key mapping:  (26 keys available)" << endl;
 }
 
+
+void playLetterSound(char letter) {
+    if ((letter >= 'A' && letter <= 'Z') || (letter >= 'a' && letter <= 'z')) {
+        if (letter >= 'a' && letter <= 'z')
+            letter -= 32; // make uppercase
+
+        string path = "sounds/alphabet/";
+        path += letter;
+        path += ".wav";
+
+        cout << "[AutoSound] Attempting to play: " << path << endl;
+
+        cout << "[AutoSound] Found file: " << path << endl;
+        PlaySound(path.c_str(), NULL, SND_FILENAME | SND_ASYNC);
+    } else {
+        cout << "[AutoSound] Ignored key: " << (int)letter << endl;
+    }
+}
+
+
 void check_keyboard_input() {
     char key = get_key_input();
     if (key != 0) {
@@ -116,6 +137,10 @@ void check_keyboard_input() {
         set_key_color(key, 255, 255, 255);
         
         cout << "Key '" << key << "' pressed (ASCII " << (int)key << ")" << endl;
+
+        // FOR ALPHABET KEYBOARD
+        
+        //playLetterSound(key);
     }
 }
 
@@ -138,6 +163,17 @@ void update_piano_state() {
         }
     }
 }
+
+// 🪄 Wrapper hook that watches for key events and plays alphabet sounds
+void monitor_keyboard_for_letters() {
+    // If a key has just been pressed, play its alphabet sound
+    if (piano_state.key_available) {
+        char letter = piano_state.last_key_pressed;
+        playLetterSound(letter);
+        piano_state.key_available = false; // mark as handled
+    }
+}
+
 
 // Enhanced TeenyAT bus read callback
 void piano_bus_read(teenyat *t, tny_uword addr, tny_word *data, uint16_t *delay) {
@@ -400,6 +436,9 @@ int main(int argc, char *argv[]) {
         tny_clock(&t);
         update_piano_state();
         update_graphics();
+
+        // monitor_keyboard_for_letters();
+        
         
         for (volatile int i = 0; i < 1000; i++);
     }
